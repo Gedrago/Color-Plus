@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/ColorScript.unity
+- path: Assets/scenes/ColorScript.unity
   isLoaded: 1
   isActive: 1

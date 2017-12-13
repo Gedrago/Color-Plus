@@ -2,46 +2,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; 
+using UnityEngine.SceneManagement; 
  
 
 public class GameScript : MonoBehaviour {
 	//define the variables
-	int score = 0; 
+	public int score = 0; 
 	float GameLength = 60; 
 	float TurnLength= 2;
 	int Turn= 0;
-	int gridLenY, gridLenX; 
+	int gridLenY = 5;
+	int gridLenX =8 ; 
 	Vector3 NextCubePosition = new Vector3 (8, 10, 0);
 	public GameObject[,] CubeArray; 
 	public GameObject CubePre; 
-	 
 	GameObject NextCube; 
 	new Vector3 CubePosition;
 	Color[] ColorArray = { Color.blue, Color.green, Color.red, Color.yellow, Color.magenta };
 	int row; 
 	bool CubeActive; 
 	bool NextCubeDisplaced;
-	GameObject ActiveCube = null; 
-	int ActiveCubeX, ActiveCubeY; 
-	List<int> iList = new List<int>();
-	float BreakTime;
+	GameObject ActiveCube = null;  
 	int RainbowPoints =5;
 	int SameColorPoints= 10; 
 	public Text ScoreText; 
 	public Text NextCubeText; 
+	public Text TimeLeft; 
 	bool GameOver = false ;
 
 	// Use this for initialization
 	void Start () {
 		//start values of variables 
-		BreakTime = 4 ;
-		gridLenX = 8;
-		gridLenY = 5; 
-		CreateCubeArray ();
-
-		 
-		 
+		CreateCubeArray ();	 
 	}
+
+	//create the array of the cubes 
 	void CreateCubeArray (){
 		CubeArray = new GameObject[gridLenX, gridLenY];
 		//make grid
@@ -51,41 +46,21 @@ public class GameScript : MonoBehaviour {
 				CubeArray[x,y]= Instantiate (CubePre, CubePosition, Quaternion.identity);
 				CubeArray [x, y].GetComponent<CubeScript> ().IndividualX = x;
 				CubeArray [x, y].GetComponent<CubeScript> ().IndividualY = y;
-
 			}
 		}
 	}
 
+
+	//create the nextcube that appears ontop 
 	void GetNextCube(){
 		NextCube = Instantiate ( CubePre , NextCubePosition, Quaternion.identity);
 		int RandomColor = Random.Range (0, ColorArray.Length);
 		NextCube.GetComponent<Renderer> ().material.color = ColorArray [RandomColor];
 		NextCube.GetComponent<CubeScript> ().NextCube = true; 
-		 
-		 
-		 
-	}
-	void EndGame(bool win){
-		if (win) {
-			NextCubeText.text = "YOU WIN";
-			 
-		} else {
-			NextCubeText.text = "you lost! Try again :) ";
-		}
-		Destroy (NextCube); 
-		NextCube = null; 
-		GameOver = true;
-		for (int y = 0; y < gridLenY ; y ++){
-			for (int x = 0; x < gridLenX  ; x++) {
-				CubeArray [x, y].GetComponent<CubeScript> ().NextCube = true; 
-				 
-
-			}
-		}
-			 
-
 	}
 
+
+	//find the an available white space to place the 'Next Cube'
 	GameObject FindAvailableCube(int y){
 		List<GameObject> whiteCubes = new List<GameObject> () ;
 		 
@@ -99,21 +74,18 @@ public class GameScript : MonoBehaviour {
 			
 		}
 		return PickWhiteCubes (whiteCubes);
-
 	}
 
+	// picks random white cube from a list of gameobject white cubes 
 	GameObject PickWhiteCubes (List<GameObject> whiteCubes){
 		if (whiteCubes.Count == 0){
 			return null; 
-
 		}
-		//pick a random cube 
-
+		//pick a random cube from the list of cubes 
 		return whiteCubes[Random.Range(0,whiteCubes.Count)]; 
-
-
 	}
 
+	//find available white spaces to black out later 
 	GameObject FindAvailableCube(){
 		List<GameObject> whiteCubes = new List<GameObject> () ;
 
@@ -129,13 +101,13 @@ public class GameScript : MonoBehaviour {
 			}
 		}
 		return PickWhiteCubes (whiteCubes);
-
-
-
 	}
+
+	//color a cube by giving this method which cube to color and what color to color it with 
 	void SetCubeColor (GameObject mycube, Color color ){
 		if ( mycube == null) {
 			EndGame (false);
+			SceneManager.LoadScene (2);
 		} 
 		else {
 			mycube.GetComponent<Renderer>().material.color =  color;
@@ -145,13 +117,13 @@ public class GameScript : MonoBehaviour {
 		}
 
 	}
+	// transport the color of the next cube to the available cube generated from the method 'FindAvailableCube(int y)'
 	void TransportCube(int y){
 		//goes over each of the columns of a specific and checks which one is white and which one is black
 		GameObject WhiteCube = FindAvailableCube(y);
-		SetCubeColor (WhiteCube, NextCube.GetComponent<Renderer>().material.color  ); 
-
-
+		SetCubeColor (WhiteCube, NextCube.GetComponent<Renderer>().material.color ); 
 	}
+	// turn an available cube generated from the method 'FindAvailableCube()' and turn the color to black(blackout the position)
 	void AddBlackCube (){
 		GameObject WhiteCube = FindAvailableCube();
 		//use a color value greater than 15 
@@ -159,7 +131,7 @@ public class GameScript : MonoBehaviour {
 	}  
 
 
-
+	//makes the game respond to keyboard inputs 
 	void ProcessKeyboard() {
 		//Detects what keyboard input was given and returns the number 
 		int Numpressed= 0; 
@@ -185,12 +157,11 @@ public class GameScript : MonoBehaviour {
 		}
 
 	}
-		
+
+
+	//makes the game respond to keyboard inputs 
 	public void ProcessClick (GameObject clickedCube, int IndividualX , int IndividualY , Color CubeColor, bool Active  ){
 
-		// Any time a player clicks a colored cube (non-white, non-black) in the grid, the cube should activate.
-		//An activated cube should highlight in some way, like enlarging a little bit or having a spotlight shine on it. 
-		//Only one cube can be active at a time. If a player clicks an active cube, it should deactivate.
 		if (CubeColor!= Color.white && CubeColor!= Color.black) {
 			if (Active  == false) { 
 				if(ActiveCube != null){
@@ -230,34 +201,10 @@ public class GameScript : MonoBehaviour {
 				//print (clickedCube.GetComponent<CubeScript> ().ColorValue ); 
 			}	 
 		} 
-		//Cube movement due to clicking happens instantly and not on turn boundaries. 
-		//Therefore, with fast clicking, it’s possible to make many moves in a single turn.
-		//Note: The players can only move a colored cube to a white cube, 
-		//so if the players click a colored cube and then another colored cube, no switching happens, 
-		//and the second colored cube ends up being the active one. For example:
-		}  
+	}  
+		
 
-	//create a method to detect the color plus ...first to detect a same color plus 
-	 
-	 
-	void MakeBlackPlus(int x , int y ){
-		if(x==0 || y == 0 || x == gridLenX-1 || y == gridLenY-1 ){
-			return ; 
-			
-		}
-		CubeArray [x, y].GetComponent<Renderer> ().material.color = Color.black; 
-		CubeArray [x+1, y].GetComponent<Renderer> ().material.color = Color.black; 
-		CubeArray [x-1, y].GetComponent<Renderer> ().material.color = Color.black; 
-		CubeArray [x, y+1].GetComponent<Renderer> ().material.color = Color.black; 
-		CubeArray [x, y-1].GetComponent<Renderer> ().material.color = Color.black; 
-		if(ActiveCube!= null && ActiveCube.GetComponent<Renderer>().material.color== Color.black ){
-			ActiveCube.transform.localScale /= 1.5f;
-			ActiveCube.GetComponent<CubeScript>().Active = false; 
-			ActiveCube = null; 
-			
-		}
-
-	}
+	//detects whether or not the player made a rainbow plus 
 	bool IsRainbowPlus (int x, int y){
 		Color a = CubeArray [x, y].GetComponent<Renderer> ().material.color;
 		Color b = CubeArray [x+1, y].GetComponent<Renderer> ().material.color;
@@ -283,6 +230,8 @@ public class GameScript : MonoBehaviour {
 		}
 		 
 	}
+
+	//detects whether or not the player made a same color plus 
 	bool IsSameColorPlus(int x, int y){
 		if (CubeArray [x, y].GetComponent<Renderer> ().material.color != Color.black &&
 			CubeArray [x, y].GetComponent<Renderer> ().material.color != Color.white &&
@@ -297,6 +246,26 @@ public class GameScript : MonoBehaviour {
 		
 	}
 
+	// blackout the plus when we make a rainbowplus or a black plus 
+	void MakeBlackPlus(int x , int y ){
+		if(x==0 || y == 0 || x == gridLenX-1 || y == gridLenY-1 ){
+			return ; 
+
+		}
+		CubeArray [x, y].GetComponent<Renderer> ().material.color = Color.black; 
+		CubeArray [x+1, y].GetComponent<Renderer> ().material.color = Color.black; 
+		CubeArray [x-1, y].GetComponent<Renderer> ().material.color = Color.black; 
+		CubeArray [x, y+1].GetComponent<Renderer> ().material.color = Color.black; 
+		CubeArray [x, y-1].GetComponent<Renderer> ().material.color = Color.black; 
+		if(ActiveCube!= null && ActiveCube.GetComponent<Renderer>().material.color== Color.black ){
+			ActiveCube.transform.localScale /= 1.5f;
+			ActiveCube.GetComponent<CubeScript>().Active = false; 
+			ActiveCube = null; 
+
+		}
+	}
+
+	//score the player according to the kind of plus they achieved 
 	void Score (){
 		// check for the edge, from 1 to gridlenY-1 because we are not including the edges 
 		for (int x= 1; x < gridLenX -1 ; x++){
@@ -310,19 +279,48 @@ public class GameScript : MonoBehaviour {
 					MakeBlackPlus (x,y); 
 					
 				}
-
 			}
-			
 		}
 	}
 	 
-	
+	// Ends the game based on if the player won or didnt win and also make all the cubes unresponsive to clicks by treating all of the cubes as nextcube 
+	public string EndGame(bool win){
+		if (win) {
+			NextCubeText.text = "YOU WIN";
+			return "You win";
+
+		} else {
+			NextCubeText.text = "you lost! Try again :) ";
+			return "You lost!"; 
+		}
+		Destroy (NextCube); 
+		NextCube = null; 
+		GameOver = true;
+
+		for (int y = 0; y < gridLenY ; y ++){
+			for (int x = 0; x < gridLenX  ; x++) {
+				CubeArray [x, y].GetComponent<CubeScript> ().NextCube = true; 
+
+
+			}
+		}
+
+
+	}
+		
 	// Update is called once per frame
 	void Update () { 
-		if (Time.time < GameLength) {
+		if (Time.timeSinceLevelLoad < GameLength) {
 			ProcessKeyboard (); 
-			Score (); 
-			if (Time.time > TurnLength * Turn) {
+			Score ();
+			float timeleft = GameLength - Time.timeSinceLevelLoad ; 
+			timeleft = Mathf.Round(timeleft * 1f) / 1f;
+			if (timeleft <= 10){
+				TimeLeft.GetComponent<Text> ().color = Color.red; 
+				TimeLeft.text = "Time left: " + timeleft;
+			}
+			TimeLeft.text = "Time left: " + timeleft;
+			if (Time.timeSinceLevelLoad > TurnLength * Turn) {
 				Turn++;
 				if (NextCube != null) {
 					score -= 1;
@@ -333,21 +331,20 @@ public class GameScript : MonoBehaviour {
 				}
 
 				GetNextCube ();
-
-
 			}
 			ScoreText.text = "Score: " + score; 
+			PlayerPrefs.SetInt ("SCORE", score); 
 
-
-			} else if (!GameOver){
+		} 
+		else if (!GameOver){
 			if (score > 0) {
 				EndGame (true);
-				
-			} else {
+			} 
+			else {
 				EndGame (false);
 			}
+			SceneManager.LoadScene (2);
 		}
-
 		 
 	}
 }
