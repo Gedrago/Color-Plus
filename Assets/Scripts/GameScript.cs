@@ -44,8 +44,8 @@ public class GameScript : MonoBehaviour {
 			for (int x = 0; x < gridLenX  ; x++) {
 				CubePosition = new Vector3 (x *2, y * 2, 0);
 				CubeArray[x,y]= Instantiate (CubePre, CubePosition, Quaternion.identity);
-				CubeArray [x, y].GetComponent<CubeScript> ().IndividualX = x;
-				CubeArray [x, y].GetComponent<CubeScript> ().IndividualY = y;
+				CubeArray [x, y].GetComponent<CubeControllerScript> ().IndividualX = x;
+				CubeArray [x, y].GetComponent<CubeControllerScript> ().IndividualY = y;
 			}
 		}
 	}
@@ -56,7 +56,7 @@ public class GameScript : MonoBehaviour {
 		NextCube = Instantiate ( CubePre , NextCubePosition, Quaternion.identity);
 		int RandomColor = Random.Range (0, ColorArray.Length);
 		NextCube.GetComponent<Renderer> ().material.color = ColorArray [RandomColor];
-		NextCube.GetComponent<CubeScript> ().NextCube = true; 
+		NextCube.GetComponent<CubeControllerScript> ().NextCube = true; 
 	}
 
 
@@ -166,17 +166,17 @@ public class GameScript : MonoBehaviour {
 			if (Active  == false) { 
 				if(ActiveCube != null){
 					ActiveCube.transform.localScale /= 1.5f;
-					ActiveCube.GetComponent<CubeScript> ().Active = false;
+					ActiveCube.GetComponent<CubeControllerScript> ().Active = false;
 
 				}
 				clickedCube.transform.localScale *= 1.5f;
-				clickedCube.GetComponent<CubeScript> ().Active = true; 
+				clickedCube.GetComponent<CubeControllerScript> ().Active = true; 
 				ActiveCube = clickedCube; 
 				 
 			} else   {
 				
 				clickedCube.transform.localScale /= 1.5f;
-				clickedCube.GetComponent<CubeScript> ().Active = false;
+				clickedCube.GetComponent<CubeControllerScript> ().Active = false;
 				ActiveCube = null; 
 			}
 		} 
@@ -184,21 +184,21 @@ public class GameScript : MonoBehaviour {
 		//the active cube moves to that location instantly (and remains active). 
 		//The location that the active cube just vacated should become a white cube.
 		else if (CubeColor == Color.white && ActiveCube!= null) {
-			if (Mathf.Abs(clickedCube.GetComponent<CubeScript>().IndividualX - ActiveCube.GetComponent<CubeScript>().IndividualX) <= 1 && Mathf.Abs(clickedCube.GetComponent<CubeScript>().IndividualY - ActiveCube.GetComponent<CubeScript>().IndividualY) <= 1){
+			if (Mathf.Abs(clickedCube.GetComponent<CubeControllerScript>().IndividualX - ActiveCube.GetComponent<CubeControllerScript>().IndividualX) <= 1 && Mathf.Abs(clickedCube.GetComponent<CubeControllerScript>().IndividualY - ActiveCube.GetComponent<CubeControllerScript>().IndividualY) <= 1){
 				clickedCube.GetComponent<Renderer> ().material.color = ActiveCube.GetComponent<Renderer>().material.color;
 				 
 				ActiveCube.GetComponent<Renderer> ().material.color = Color.white; 
 				clickedCube.transform.localScale *= 1.5f;
 				ActiveCube.transform.localScale /= 1.5f;
-				ActiveCube.GetComponent<CubeScript>().Active = false; 
+				ActiveCube.GetComponent<CubeControllerScript>().Active = false; 
 				 
 				// change the active cube to the new position 
-				clickedCube.GetComponent<CubeScript>().Active = true; 
+				clickedCube.GetComponent<CubeControllerScript>().Active = true; 
 			 
 
 				//keep track of the new active cube 
 				ActiveCube = clickedCube;
-				//print (clickedCube.GetComponent<CubeScript> ().ColorValue ); 
+				  
 			}	 
 		} 
 	}  
@@ -259,7 +259,7 @@ public class GameScript : MonoBehaviour {
 		CubeArray [x, y-1].GetComponent<Renderer> ().material.color = Color.black; 
 		if(ActiveCube!= null && ActiveCube.GetComponent<Renderer>().material.color== Color.black ){
 			ActiveCube.transform.localScale /= 1.5f;
-			ActiveCube.GetComponent<CubeScript>().Active = false; 
+			ActiveCube.GetComponent<CubeControllerScript>().Active = false; 
 			ActiveCube = null; 
 
 		}
@@ -299,7 +299,7 @@ public class GameScript : MonoBehaviour {
 
 		for (int y = 0; y < gridLenY ; y ++){
 			for (int x = 0; x < gridLenX  ; x++) {
-				CubeArray [x, y].GetComponent<CubeScript> ().NextCube = true; 
+				CubeArray [x, y].GetComponent<CubeControllerScript> ().NextCube = true; 
 
 
 			}
